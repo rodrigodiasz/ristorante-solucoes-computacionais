@@ -1,5 +1,10 @@
 import { Router } from "express";
 
+// User Controllers
+import { CreateUserController } from "./controllers/user/CreateUserController";
+import { AuthUserController } from "./controllers/user/AuthUserController";
+import { DetailUserController } from "./controllers/user/DetailUserController";
+
 // Category Controllers
 import { CreateCategoryController } from "./controllers/category/CreateCategoryController";
 import { ListCategoryController } from "./controllers/category/ListCategoryController";
@@ -7,6 +12,9 @@ import { ListCategoryController } from "./controllers/category/ListCategoryContr
 // Product Controllers
 import { CreateProductController } from "./controllers/product/CreateProductController";
 import { ListProductController } from "./controllers/product/ListProductController";
+
+// Middlewares
+import { isAuthenticated } from "./middlewares/isAuthenticated";
 
 const router = Router();
 
@@ -18,13 +26,22 @@ router.get("/health", (req, res) => {
     });
 });
 
+// User routes
+router.post("/users", new CreateUserController().handle);
+router.post("/session", new AuthUserController().handle);
+router.get("/me", isAuthenticated, new DetailUserController().handle);
+
 // Category routes
-router.post("/categories", new CreateCategoryController().handle);
-router.get("/categories", new ListCategoryController().handle);
+router.post(
+    "/categories",
+    isAuthenticated,
+    new CreateCategoryController().handle
+);
+router.get("/categories", isAuthenticated, new ListCategoryController().handle);
 
 // Product routes
-router.post("/products", new CreateProductController().handle);
-router.get("/products", new ListProductController().handle);
+router.post("/products", isAuthenticated, new CreateProductController().handle);
+router.get("/products", isAuthenticated, new ListProductController().handle);
 
 // API info route
 router.get("/", (req, res) => {
@@ -33,6 +50,11 @@ router.get("/", (req, res) => {
         version: "1.0.0",
         endpoints: {
             health: "/api/health",
+            users: {
+                create: "POST /api/users",
+                login: "POST /api/session",
+                profile: "GET /api/me",
+            },
             categories: {
                 create: "POST /api/categories",
                 list: "GET /api/categories",
