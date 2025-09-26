@@ -35,9 +35,10 @@ export default function Signup() {
       });
       toast.success("Conta criada com sucesso!");
       router.push("/");
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      toast.error("Erro ao criar conta");
+      const errorMessage = err.response?.data?.error || "Erro ao criar conta";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
