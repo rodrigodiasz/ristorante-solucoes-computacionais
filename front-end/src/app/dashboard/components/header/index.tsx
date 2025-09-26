@@ -2,16 +2,26 @@
 
 import Link from "next/link";
 import { LogOutIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { deleteCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ThemeSwitch } from "@/components/ui/switch";
+import { usePathname } from "next/navigation";
 
 export function Header() {
+  const router = useRouter();
   const pathname = usePathname();
+
+  async function handleLogout() {
+    deleteCookie("session", { path: "/" });
+    toast.success("Logout feito com sucesso!");
+    router.replace("/");
+  }
 
   const isActive = (path: string) => pathname === path;
 
   return (
-    <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-50 transition-colors">
+    <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link
@@ -52,6 +62,7 @@ export function Header() {
               <button
                 className="p-2 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-full transition-colors"
                 title="Sair"
+                onClick={handleLogout}
               >
                 <LogOutIcon size={20} className="text-red-500" />
               </button>

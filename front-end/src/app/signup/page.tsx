@@ -1,25 +1,26 @@
 "use client";
 import Link from "next/link";
-import { api } from "../services/api";
-import { Button } from "@/components/ui/button";
+import { api } from "../../services/api";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UserPlus, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-export default function Home() {
+export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    if (email === "" || password === "") {
+    if (name === "" || email === "" || password === "") {
       toast.error("Preencha todos os campos");
       return;
     }
@@ -27,24 +28,16 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/session", {
+      await api.post("/users", {
+        name,
         email,
         password,
       });
-
-      if (!response.data.token) {
-        toast.error("Erro ao fazer login");
-        return;
-      }
-
-      document.cookie = `session=${response.data.token}; path=/; max-age=${
-        60 * 60 * 24 * 30
-      }`;
-      toast.success("Login realizado com sucesso!");
-      router.push("/dashboard");
+      toast.success("Conta criada com sucesso!");
+      router.push("/");
     } catch (err) {
       console.log(err);
-      toast.error("Erro ao fazer login");
+      toast.error("Erro ao criar conta");
     } finally {
       setIsLoading(false);
     }
@@ -63,10 +56,10 @@ export default function Home() {
           </div>
           <div className="flex flex-col items-center">
             <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-              Login
+              Criar Conta
             </h2>
             <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              Entre com suas credenciais para acessar o sistema
+              Preencha os dados para criar sua conta
             </p>
           </div>
         </div>
@@ -74,8 +67,25 @@ export default function Home() {
         <div className="mt-8">
           <form
             className="space-y-6 bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700"
-            onSubmit={handleLogin}
+            onSubmit={handleRegister}
           >
+            <div className="space-y-2">
+              <label
+                htmlFor="name"
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Nome
+              </label>
+              <Input
+                id="name"
+                className="w-full dark:bg-zinc-800 bg-white text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700"
+                type="text"
+                placeholder="Digite seu nome completo"
+                required
+                name="name"
+              />
+            </div>
+
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -118,21 +128,21 @@ export default function Home() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Entrando...
+                  Criando conta...
                 </>
               ) : (
-                "Entrar"
+                "Criar Conta"
               )}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            Não possui uma conta?{" "}
+            Já possui uma conta?{" "}
             <Link
-              href="/signup"
+              href="/"
               className="font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
             >
-              Criar conta
+              Fazer login
             </Link>
           </p>
         </div>

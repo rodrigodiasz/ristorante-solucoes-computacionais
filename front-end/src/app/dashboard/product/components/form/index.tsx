@@ -69,7 +69,7 @@ export function Form({ categories }: Props) {
     const token = await getCookieClient();
 
     try {
-      await api.post("/api/products", data, {
+      await api.post("/products", data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
