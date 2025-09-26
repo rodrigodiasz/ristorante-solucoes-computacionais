@@ -19,7 +19,13 @@ export function isAuthenticated(
     const [, token] = authToken.split(" ");
 
     try {
-        const { sub } = verify(token, process.env.JWT_SECRET) as Payload;
+        const jwtSecret = process.env.JWT_SECRET;
+
+        if (!jwtSecret) {
+            return res.status(500).json({ error: "JWT secret not configured" });
+        }
+
+        const { sub } = verify(token, jwtSecret) as Payload;
 
         req.user_id = sub;
 
