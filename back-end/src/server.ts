@@ -13,9 +13,13 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.use(
-    cors({
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    })
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    optionsSuccessStatus: 200,
+  })
 );
 
 // Routes
@@ -26,16 +30,16 @@ app.use("/files", express.static(path.resolve(__dirname, "..", "tmp")));
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    if (err instanceof Error) {
-        return res.status(400).json({
-            error: err.message,
-        });
-    }
-
-    return res.status(500).json({
-        status: "error",
-        message: "Internal server error",
+  if (err instanceof Error) {
+    return res.status(400).json({
+      error: err.message,
     });
+  }
+
+  return res.status(500).json({
+    status: "error",
+    message: "Internal server error",
+  });
 });
 
 // Health check
@@ -46,5 +50,5 @@ app.get("/health", (req: Request, res: Response) => {
 const PORT = process.env.PORT || 3333;
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
