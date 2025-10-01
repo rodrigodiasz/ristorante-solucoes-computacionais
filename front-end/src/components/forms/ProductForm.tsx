@@ -32,7 +32,7 @@ export function ProductForm() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await api.get("/api/categories");
+        const data = await api.get("/categories");
         setCategories(data.data);
       } catch (error) {
         setMessage({
@@ -74,7 +74,7 @@ export function ProductForm() {
     setMessage(null);
 
     try {
-      await api.post("/api/products", formData);
+      await api.post("/products", formData);
       setMessage({ type: "success", text: "Produto criado com sucesso!" });
       setFormData({
         name: "",
