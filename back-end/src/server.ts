@@ -5,8 +5,14 @@ import path from "path";
 import dotenv from "dotenv";
 
 import { router } from "./routes";
+import { checkEnvironmentVariables, checkDirectories, logEnvironmentInfo } from "./config/production";
 
 dotenv.config();
+
+// Production environment checks
+logEnvironmentInfo();
+checkEnvironmentVariables();
+checkDirectories();
 
 const app = express();
 
