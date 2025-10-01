@@ -12,6 +12,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -27,6 +28,7 @@ app.use("/api", router);
 
 // Static files
 app.use("/files", express.static(path.resolve(__dirname, "..", "tmp")));
+app.use("/files/uploads", express.static(path.resolve(__dirname, "..", "tmp", "uploads")));
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {

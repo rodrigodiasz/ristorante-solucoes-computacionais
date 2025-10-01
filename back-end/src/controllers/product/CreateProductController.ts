@@ -3,7 +3,11 @@ import { CreateProductService } from "../../services/product/CreateProductServic
 
 class CreateProductController {
     async handle(req: Request, res: Response) {
-        const { name, price, description, banner, category_id } = req.body;
+        const { name, price, description, category_id, banner } = req.body;
+        let bannerUrl = banner || "";
+        if (req.file) {
+            bannerUrl = `/files/uploads/${req.file.filename}`;
+        }
 
         const createProductService = new CreateProductService();
 
@@ -11,7 +15,7 @@ class CreateProductController {
             name,
             price,
             description,
-            banner,
+            banner: bannerUrl,
             category_id,
         });
 
