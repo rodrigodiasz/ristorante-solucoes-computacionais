@@ -16,16 +16,31 @@ class CreateProductService {
                       banner,
                       category_id,
                   }: ProductRequest) {
-        const product = await prismaClient.product.create({
-            data: {
-                name: name,
-                price: price,
-                description: description,
-                banner: banner,
-                category_id: category_id,
-            },
-        });
-        return product;
+        try {
+            // Check if category exists
+            const categoryExists = await prismaClient.category.findUnique({
+                where: { id: category_id }
+            });
+
+            if (!categoryExists) {
+                throw new Error(`Category with id ${category_id} not found`);
+            }
+
+            const product = await prismaClient.product.create({
+                data: {
+                    name: name,
+                    price: price,
+                    description: description,
+                    banner: banner,
+                    category_id: category_id,
+                },
+            });
+
+            return product;
+        } catch (error) {
+            console.error("Error in CreateProductService:", error);
+            throw error;
+        }
     }
 }
 

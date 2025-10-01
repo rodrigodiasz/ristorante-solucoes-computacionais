@@ -13,10 +13,14 @@ export function isAuthenticated(
     const authToken = req.headers.authorization;
 
     if (!authToken) {
-        return res.status(401).end();
+        return res.status(401).json({ error: "No authorization token provided" });
     }
 
     const [, token] = authToken.split(" ");
+
+    if (!token) {
+        return res.status(401).json({ error: "Invalid authorization format" });
+    }
 
     try {
         const jwtSecret = process.env.JWT_SECRET;
@@ -31,6 +35,6 @@ export function isAuthenticated(
 
         return next();
     } catch (err) {
-        return res.status(401).end();
+        return res.status(401).json({ error: "Invalid token" });
     }
 }
