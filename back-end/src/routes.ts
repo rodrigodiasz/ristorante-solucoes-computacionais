@@ -1,6 +1,4 @@
 import { Router } from "express";
-import multer from "multer";
-import path from "path";
 
 // User Controllers
 import { CreateUserController } from "./controllers/user/CreateUserController";
@@ -15,41 +13,18 @@ import { ListCategoryController } from "./controllers/category/ListCategoryContr
 import { CreateProductController } from "./controllers/product/CreateProductController";
 import { ListProductController } from "./controllers/product/ListProductController";
 
+// Order Controllers
+import { CreateOrderController } from "./controllers/order/CreateOrderController";
+import { RemoveOrderController } from "./controllers/order/RemoveOrderController";
+import { AddItemController } from "./controllers/order/AddItemController";
+import { RemoveItemController } from "./controllers/order/RemoveItemController";
+import { SendOrderController } from "./controllers/order/SendOrderController";
+import { ListOrdersController } from "./controllers/order/ListOrdersController";
+import { DetailOrderController } from "./controllers/order/DetailOrderController";
+import { FinishOrderController } from "./controllers/order/FinishOrderController";
+
 // Middlewares
 import { isAuthenticated } from "./middlewares/isAuthenticated";
-
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.resolve(__dirname, "..", "tmp", "uploads");
-    
-    // Create directory if it doesn't exist
-    const fs = require('fs');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'));
-    }
-  }
-});
 
 const router = Router();
 
@@ -75,8 +50,18 @@ router.post(
 router.get("/categories", isAuthenticated, new ListCategoryController().handle);
 
 // Product routes
-router.post("/products", isAuthenticated, upload.single("file"), new CreateProductController().handle);
+router.post("/products", isAuthenticated, new CreateProductController().handle);
 router.get("/products", isAuthenticated, new ListProductController().handle);
+
+// Order routes
+router.post("/order", isAuthenticated, new CreateOrderController().handle);
+router.delete("/order", isAuthenticated, new RemoveOrderController().handle);
+router.post("/order/add", isAuthenticated, new AddItemController().handle);
+router.delete("/order/remove", isAuthenticated, new RemoveItemController().handle);
+router.put("/order/send", isAuthenticated, new SendOrderController().handle);
+router.get("/orders", isAuthenticated, new ListOrdersController().handle);
+router.get("/order/detail", isAuthenticated, new DetailOrderController().handle);
+router.put("/order/finish", isAuthenticated, new FinishOrderController().handle);
 
 // API info route
 router.get("/", (req, res) => {
@@ -97,6 +82,16 @@ router.get("/", (req, res) => {
             products: {
                 create: "POST /api/products",
                 list: "GET /api/products",
+            },
+            orders: {
+                create: "POST /api/order",
+                remove: "DELETE /api/order",
+                addItem: "POST /api/order/add",
+                removeItem: "DELETE /api/order/remove",
+                send: "PUT /api/order/send",
+                list: "GET /api/orders",
+                detail: "GET /api/order/detail",
+                finish: "PUT /api/order/finish",
             },
         },
     });
