@@ -37,6 +37,26 @@ export function Header() {
 
           <nav className="flex items-center gap-6">
             <Link
+              href="/dashboard"
+              className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
+                isActive("/dashboard")
+                  ? "text-emerald-500"
+                  : "text-zinc-600 dark:text-zinc-400"
+              }`}
+            >
+              Pedidos
+            </Link>
+            <Link
+              href="/dashboard/table"
+              className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
+                isActive("/dashboard/table")
+                  ? "text-emerald-500"
+                  : "text-zinc-600 dark:text-zinc-400"
+              }`}
+            >
+              Abrir Mesa
+            </Link>
+            <Link
               href="/dashboard/category"
               className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
                 isActive("/dashboard/category")

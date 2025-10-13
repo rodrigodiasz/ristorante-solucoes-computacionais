@@ -1,21 +1,21 @@
-"use client";
-import { UploadCloud, PackageIcon } from "lucide-react";
-import { ChangeEvent, useState } from "react";
-import Image from "next/image";
-import { api } from "@/services/api";
-import { getCookieClient } from "@/lib/cookieClient";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+'use client';
+import { UploadCloud, PackageIcon } from 'lucide-react';
+import { ChangeEvent, useState } from 'react';
+import Image from 'next/image';
+import { api } from '@/services/api';
+import { getCookieClient } from '@/lib/cookieClient';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 interface CategoryProps {
   id: string;
@@ -29,15 +29,15 @@ interface Props {
 export function Form({ categories }: Props) {
   const router = useRouter();
   const [image, setImage] = useState<File>();
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   function handleFile(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
       const image = e.target.files[0];
 
-      if (image.type !== "image/jpeg" && image.type !== "image/png") {
-        toast.warning("Formato proibido!");
+      if (image.type !== 'image/jpeg' && image.type !== 'image/png') {
+        toast.warning('Formato proibido!');
         return;
       }
 
@@ -47,38 +47,53 @@ export function Form({ categories }: Props) {
   }
 
   async function handleRegisterProduct(formData: FormData) {
-    const categoryIndex = formData.get("category");
-    const name = formData.get("name");
-    const price = formData.get("price");
-    const description = formData.get("description");
+    const categoryIndex = formData.get('category');
+    const name = formData.get('name');
+    const price = formData.get('price');
+    const description = formData.get('description');
 
     if (!name || !categoryIndex || !price || !description || !image) {
-      toast.warning("Preencha todos os campos");
+      toast.warning('Preencha todos os campos');
       return;
     }
 
     setIsLoading(true);
     const data = new FormData();
 
-    data.append("name", name);
-    data.append("price", price);
-    data.append("description", description);
-    data.append("category_id", categories[Number(categoryIndex)].id);
-    data.append("file", image);
+    data.append('name', name);
+    data.append('price', price);
+    data.append('description', description);
+    data.append('category_id', categories[Number(categoryIndex)].id);
+    data.append('file', image);
+
+    console.log('=== Frontend Debug ===');
+    console.log('Form data being sent:');
+    console.log('name:', name);
+    console.log('price:', price);
+    console.log('description:', description);
+    console.log('category_id:', categories[Number(categoryIndex)].id);
+    console.log('image:', image);
+    console.log('FormData entries:');
+    for (let [key, value] of data.entries()) {
+      console.log(key, value);
+    }
 
     const token = await getCookieClient();
+    console.log('Token:', token);
 
     try {
-      await api.post("/products", data, {
+      console.log('Making API request to /products');
+      const response = await api.post('/products', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      toast.success("Produto registrado com sucesso");
-      router.push("/dashboard");
+      console.log('API response:', response);
+      toast.success('Produto registrado com sucesso');
+      router.push('/dashboard');
     } catch (err) {
       console.log(err);
-      toast.warning("Falha ao cadastrar esse produto!");
+      toast.warning('Falha ao cadastrar esse produto!');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +155,7 @@ export function Form({ categories }: Props) {
           <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Categoria
           </label>
-          <Select name="category" onValueChange={(value) => console.log(value)}>
+          <Select name="category" onValueChange={value => console.log(value)}>
             <SelectTrigger className="w-full dark:bg-zinc-800 bg-white text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700 h-9 transition-colors">
               <SelectValue placeholder="Selecione uma categoria" />
             </SelectTrigger>
@@ -201,7 +216,7 @@ export function Form({ categories }: Props) {
           type="submit"
           disabled={isLoading}
         >
-          {isLoading ? "Cadastrando..." : "Cadastrar Produto"}
+          {isLoading ? 'Cadastrando...' : 'Cadastrar Produto'}
         </Button>
       </form>
     </main>
