@@ -1,7 +1,7 @@
 import { api } from '@/services/api';
 import { getCookieServer } from '@/lib/cookieServer';
 import { OrderProps } from '@/lib/order.type';
-import { Orders } from './components/orders/page';
+import { Orders } from './components/orders';
 
 async function getOrders(): Promise<OrderProps[] | []> {
   try {
