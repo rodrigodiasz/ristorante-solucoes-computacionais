@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { createContext, useContext, useState, ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { api } from "@/services/api";
-import { getCookieClient } from "@/lib/cookieClient";
-import { OrderItemProps } from "@/lib/order.type";
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { api } from '@/services/api';
+import { getCookieClient } from '@/lib/cookieClient';
+import { OrderItemProps } from '@/lib/order.type';
 
 interface OrderContextData {
   isOpen: boolean;
@@ -28,13 +28,13 @@ export function OrderProvider({ children }: OrderProviderProps) {
   const router = useRouter();
 
   async function onRequestOpen(order_id: string) {
-    console.log("onRequestOpen chamado com order_id:", order_id);
+    console.log('onRequestOpen chamado com order_id:', order_id);
 
     try {
       const token = await getCookieClient();
-      console.log("Token obtido:", token);
+      console.log('Token obtido:', token);
 
-      const response = await api.get("/order/detail", {
+      const response = await api.get('/order/detail', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,16 +43,16 @@ export function OrderProvider({ children }: OrderProviderProps) {
         },
       });
 
-      console.log("Resposta da API:", response.data);
+      console.log('Resposta da API:', response.data);
       setOrder(response.data);
       setIsOpen(true);
     } catch (error) {
-      console.error("Erro ao obter os detalhes do pedido:", error);
+      console.error('Erro ao obter os detalhes do pedido:', error);
     }
   }
 
   function onRequestClose() {
-    console.log("onRequestClose chamado");
+    console.log('onRequestClose chamado');
     setIsOpen(false);
   }
 
@@ -63,37 +63,45 @@ export function OrderProvider({ children }: OrderProviderProps) {
     };
 
     try {
-      await api.put("/order/finish", data, {
+      await api.put('/order/finish', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      // Clear the order state after finishing
+      setOrder([]);
+      setIsOpen(false);
+
+      toast.success('Pedido finalizado!');
+      router.refresh();
     } catch (err) {
       console.log(err);
-      toast.error("Falha ao finalizar o pedido!");
-      return;
+      toast.error('Falha ao finalizar o pedido!');
     }
-    toast.success("Pedido finalizado!");
-    router.refresh();
-    setIsOpen(false);
   }
 
   async function removeOrderItem(itemId: string) {
     try {
       const token = await getCookieClient();
-      await api.delete("/order/remove", {
+      await api.delete('/order/remove', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: {
+        params: {
           item_id: itemId,
         },
       });
-      toast.success("Item removido!");
+      toast.success('Item removido!');
+
+      // Remove item from local state immediately
+      setOrder(prevOrder => prevOrder.filter(item => item.id !== itemId));
+
+      // Refresh router to sync with server
       router.refresh();
     } catch (err) {
       console.log(err);
-      toast.error("Falha ao remover item!");
+      toast.error('Falha ao remover item!');
     }
   }
 
@@ -112,4 +120,3 @@ export function OrderProvider({ children }: OrderProviderProps) {
     </OrderContext.Provider>
   );
 }
-

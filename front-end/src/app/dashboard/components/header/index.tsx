@@ -37,16 +37,6 @@ export function Header() {
 
           <nav className="flex items-center gap-6">
             <Link
-              href="/dashboard"
-              className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
-                isActive("/dashboard")
-                  ? "text-emerald-500"
-                  : "text-zinc-600 dark:text-zinc-400"
-              }`}
-            >
-              Pedidos
-            </Link>
-            <Link
               href="/dashboard/table"
               className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
                 isActive("/dashboard/table")
@@ -54,7 +44,17 @@ export function Header() {
                   : "text-zinc-600 dark:text-zinc-400"
               }`}
             >
-              Abrir Mesa
+              Mesas
+            </Link>
+            <Link
+              href="/dashboard/order"
+              className={`text-sm font-medium transition-colors hover:text-emerald-500 ${
+                isActive("/dashboard/order")
+                  ? "text-emerald-500"
+                  : "text-zinc-600 dark:text-zinc-400"
+              }`}
+            >
+              Pedidos
             </Link>
             <Link
               href="/dashboard/category"
@@ -80,9 +80,9 @@ export function Header() {
             <div className="flex items-center gap-4 ml-4 pl-4 border-l border-zinc-200 dark:border-zinc-800">
               <ThemeSwitch />
               <button
+                onClick={handleLogout}
                 className="p-2 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-full transition-colors"
                 title="Sair"
-                onClick={handleLogout}
               >
                 <LogOutIcon size={20} className="text-red-500" />
               </button>
