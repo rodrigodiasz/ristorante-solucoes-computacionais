@@ -63,15 +63,17 @@ export function Header() {
 
     switch (userRole) {
       case 'ADMIN':
-        return true; 
+        return true;
       case 'GERENTE':
-        return linkPath !== '/dashboard/admin'; 
+        return linkPath !== '/dashboard/admin';
       case 'GARCOM':
-        return ['/dashboard/table', '/dashboard/order'].includes(linkPath);
+        return ['/dashboard', '/dashboard/table', '/dashboard/order'].includes(
+          linkPath
+        );
       case 'COZINHA':
         return ['/dashboard/kitchen'].includes(linkPath);
       case 'USER':
-        return false; 
+        return false;
       default:
         return false;
     }
@@ -93,6 +95,20 @@ export function Header() {
           </button>
 
           <nav className="flex items-center gap-6">
+            {shouldShowLink('/dashboard') && (
+              <Link
+                href="/dashboard"
+                className={`text-sm font-medium transition-colors hover:text-emerald-500 flex items-center gap-2 ${
+                  isActive('/dashboard')
+                    ? 'text-emerald-500'
+                    : 'text-zinc-600 dark:text-zinc-400'
+                }`}
+              >
+                <Menu size={16} />
+                Dashboard
+              </Link>
+            )}
+
             {shouldShowLink('/dashboard/table') && (
               <Link
                 href="/dashboard/table"
