@@ -46,4 +46,26 @@ export interface ProductProps {
   category_id: string;
   created_at: string;
   updated_at: string;
+  category?: {
+    id: string;
+    name: string;
+    created_at: string;
+    updated_at?: string;
+  };
+}
+
+export interface UserProps {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'USER' | 'GARCOM' | 'COZINHA' | 'GERENTE';
+  created_at: string;
+}
+
+export interface AuthResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'USER' | 'GARCOM' | 'COZINHA' | 'GERENTE';
+  token: string;
 }
