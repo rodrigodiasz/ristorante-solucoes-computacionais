@@ -1,37 +1,50 @@
-import { api } from "@/services/api";
-import { getCookieServer } from "@/lib/cookieServer";
-import { redirect } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { TagIcon } from "lucide-react";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/services/api';
+import { getCookieClient } from '@/lib/cookieClient';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { TagIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Category() {
-  async function handleRegisterCategory(formData: FormData) {
-    "use server";
-    const name = formData.get("name");
+  const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-    if (name === "") {
+  async function handleRegisterCategory(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error('Nome da categoria é obrigatório');
       return;
     }
 
-    const data = {
-      name: name,
-    };
+    setIsLoading(true);
 
-    const token = await getCookieServer();
+    try {
+      const token = await getCookieClient();
 
-    await api
-      .post("/categories", data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .catch((err) => {
-        console.log(err);
-        return;
-      });
+      await api.post(
+        '/categories',
+        { name: name.trim() },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    redirect("/dashboard");
+      toast.success('Categoria cadastrada com sucesso!');
+      router.push('/dashboard');
+    } catch (error) {
+      console.log(error);
+      toast.error('Falha ao cadastrar categoria!');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -51,7 +64,7 @@ export default function Category() {
       <div className="max-w-md mx-auto">
         <form
           className="space-y-6 bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 transition-colors"
-          action={handleRegisterCategory}
+          onSubmit={handleRegisterCategory}
         >
           <div className="space-y-2">
             <label
@@ -64,8 +77,10 @@ export default function Category() {
               id="name"
               className="w-full dark:bg-zinc-800 bg-white text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700 transition-colors"
               type="text"
-              name="name"
+              value={name}
+              onChange={e => setName(e.target.value)}
               placeholder="Ex: Pizzas, Bebidas, Sobremesas..."
+              disabled={isLoading}
               required
             />
           </div>
@@ -73,8 +88,9 @@ export default function Category() {
           <Button
             className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2.5 transition-colors"
             type="submit"
+            disabled={isLoading}
           >
-            Cadastrar Categoria
+            {isLoading ? 'Cadastrando...' : 'Cadastrar Categoria'}
           </Button>
         </form>
       </div>

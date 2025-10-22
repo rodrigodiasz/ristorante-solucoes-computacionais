@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { api } from "@/services/api";
+import { toast } from "sonner";
 
 export function CategoryForm() {
   const [name, setName] = useState("");
@@ -25,7 +26,7 @@ export function CategoryForm() {
     e.preventDefault();
 
     if (!name.trim()) {
-      setMessage({ type: "error", text: "Nome da categoria é obrigatório" });
+      toast.error("Nome da categoria é obrigatório");
       return;
     }
 
@@ -33,14 +34,16 @@ export function CategoryForm() {
     setMessage(null);
 
     try {
-      await api.post("/api/categories", { name: name.trim() });
+      await api.post("/categories", { name: name.trim() });
+      toast.success("Categoria criada com sucesso!");
       setMessage({ type: "success", text: "Categoria criada com sucesso!" });
       setName("");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erro ao criar categoria";
+      toast.error(errorMessage);
       setMessage({
         type: "error",
-        text:
-          error instanceof Error ? error.message : "Erro ao criar categoria",
+        text: errorMessage,
       });
     } finally {
       setLoading(false);

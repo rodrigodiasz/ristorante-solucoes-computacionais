@@ -41,6 +41,7 @@ import { FinishOrderController } from './controllers/order/FinishOrderController
 // Middlewares
 import { isAuthenticated } from './middlewares/isAuthenticated';
 import { isAdmin } from './middlewares/isAdmin';
+import { upload } from './middlewares/upload';
 
 const router = Router();
 
@@ -125,7 +126,12 @@ router.delete(
 );
 
 // Product routes
-router.post('/products', isAuthenticated, new CreateProductController().handle);
+router.post(
+  '/products',
+  isAuthenticated,
+  upload.single('file'),
+  new CreateProductController().handle
+);
 router.get('/products', isAuthenticated, new ListProductController().handle);
 router.put(
   '/products/:id',
