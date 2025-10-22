@@ -7,11 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  USER
+  GARCOM
+  COZINHA
+  GERENTE
+}
+
 model User {
   id         String    @id @default(uuid())
   name       String
   email      String    @unique
   password   String
+  role       UserRole  @default(USER)
   created_at DateTime? @default(now())
   updated_at DateTime? @default(now())
 
@@ -38,7 +47,7 @@ model Product {
   updated_at  DateTime? @default(now())
   category_id String
   items       Item[]
-  category    Category  @relation(fields: [category_id], references: [id])
+  category    Category  @relation(fields: [category_id], references: [id], onDelete: Cascade)
 
   @@map("products")
 }
@@ -64,7 +73,19 @@ model Item {
   order_id   String
   product_id String
   order      Order     @relation(fields: [order_id], references: [id])
-  product    Product   @relation(fields: [product_id], references: [id])
+  product    Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@map("items")
+}
+
+model RolePermission {
+  id         String    @id @default(uuid())
+  role       UserRole
+  route      String
+  can_access Boolean   @default(true)
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@unique([role, route])
+  @@map("role_permissions")
 }

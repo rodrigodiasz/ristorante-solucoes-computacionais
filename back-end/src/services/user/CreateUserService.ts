@@ -1,24 +1,25 @@
-import prismaClient from "../../prisma";
-import { hash } from "bcryptjs";
+import prismaClient from '../../prisma';
+import { hash } from 'bcryptjs';
 
 interface UserRequest {
-    name: string;
-    email: string;
-    password: string;
+  name: string;
+  email: string;
+  password: string;
+  role?: 'ADMIN' | 'USER' | 'GARCOM' | 'COZINHA' | 'GERENTE';
 }
 
 class CreateUserService {
-  async execute({ name, email, password }: UserRequest) {
+  async execute({ name, email, password, role = 'USER' }: UserRequest) {
     if (!name) {
-      throw new Error("Name is required");
+      throw new Error('Name is required');
     }
 
     if (!email) {
-      throw new Error("Email is required");
+      throw new Error('Email is required');
     }
 
     if (!password) {
-      throw new Error("Password is required");
+      throw new Error('Password is required');
     }
 
     const userAlreadyExists = await prismaClient.user.findFirst({
@@ -28,7 +29,7 @@ class CreateUserService {
     });
 
     if (userAlreadyExists) {
-      throw new Error("User already exists");
+      throw new Error('User already exists');
     }
 
     const passwordHash = await hash(password, 8);
@@ -38,11 +39,13 @@ class CreateUserService {
         name: name,
         email: email,
         password: passwordHash,
+        role: role,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        role: true,
       },
     });
 

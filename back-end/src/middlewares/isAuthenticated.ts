@@ -1,51 +1,51 @@
-import { NextFunction, Request, Response } from "express";
-import { verify } from "jsonwebtoken";
+import { NextFunction, Request, Response } from 'express';
+import { verify } from 'jsonwebtoken';
+import prismaClient from '../prisma';
 
 interface Payload {
-    sub: string;
+  sub: string;
 }
 
-export function isAuthenticated(
-    req: Request,
-    res: Response,
-    next: NextFunction
+export async function isAuthenticated(
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) {
-    console.log("=== isAuthenticated (Production Debug) ===");
-    console.log("Request URL:", req.url);
-    console.log("Request method:", req.method);
-    console.log("Environment:", process.env.NODE_ENV);
-    console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
-    
-    const authToken = req.headers.authorization;
+  const authToken = req.headers.authorization;
 
-    if (!authToken) {
-        console.log("No authorization token provided");
-        return res.status(401).json({ error: "No authorization token provided" });
+  if (!authToken) {
+    return res.status(401).json({ error: 'No authorization token provided' });
+  }
+
+  const [, token] = authToken.split(' ');
+
+  if (!token) {
+    return res.status(401).json({ error: 'Invalid authorization format' });
+  }
+
+  try {
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      return res.status(500).json({ error: 'JWT secret not configured' });
     }
 
-    const [, token] = authToken.split(" ");
+    const { sub } = verify(token, jwtSecret) as Payload;
 
-    if (!token) {
-        console.log("Invalid authorization format");
-        return res.status(401).json({ error: "Invalid authorization format" });
+    const user = await prismaClient.user.findUnique({
+      where: { id: sub },
+      select: { id: true, role: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
     }
 
-    try {
-        const jwtSecret = process.env.JWT_SECRET;
+    req.user_id = sub;
+    req.user_role = user.role;
 
-        if (!jwtSecret) {
-            console.log("JWT secret not configured");
-            return res.status(500).json({ error: "JWT secret not configured" });
-        }
-
-        const { sub } = verify(token, jwtSecret) as Payload;
-        console.log("Token verified successfully, user_id:", sub);
-
-        req.user_id = sub;
-
-        return next();
-    } catch (err) {
-        console.log("Token verification failed:", err);
-        return res.status(401).json({ error: "Invalid token" });
-    }
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
 }
