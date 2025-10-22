@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
-import { CreateUserService } from "../../services/user/CreateUserService";
+import { Request, Response } from 'express';
+import { CreateUserService } from '../../services/user/CreateUserService';
 
 class CreateUserController {
   async handle(req: Request, res: Response) {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const createUserService = new CreateUserService();
 
@@ -12,6 +12,7 @@ class CreateUserController {
         name,
         email,
         password,
+        role,
       });
       return res.json(user);
     } catch (error: any) {

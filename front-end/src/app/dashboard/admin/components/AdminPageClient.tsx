@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { UserProps } from '@/lib/order.type';
 import { UsersTable } from './UsersTable';
 import { PermissionsTable } from './PermissionsTable';
+import { UserForm } from './UserForm';
 import { api } from '@/services/api';
 import { getCookieClient } from '@/lib/cookieClient';
 import { toast } from 'sonner';
-import { Users, Shield } from 'lucide-react';
+import { Users, Shield, UserPlus } from 'lucide-react';
 
 interface AdminPageClientProps {
   initialUsers: UserProps[];
@@ -24,7 +25,9 @@ export function AdminPageClient({
   const [users, setUsers] = useState<UserProps[]>(initialUsers);
   const [permissions, setPermissions] = useState(initialPermissions);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'permissions'>('users');
+  const [activeTab, setActiveTab] = useState<
+    'users' | 'permissions' | 'register'
+  >('users');
 
   const refreshUsers = async () => {
     setIsLoading(true);
@@ -99,6 +102,17 @@ export function AdminPageClient({
               <Shield size={16} />
               Permissões
             </button>
+            <button
+              onClick={() => setActiveTab('register')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
+                activeTab === 'register'
+                  ? 'border-emerald-500 text-emerald-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <UserPlus size={16} />
+              Cadastrar Usuário
+            </button>
           </nav>
         </div>
       </div>
@@ -152,6 +166,8 @@ export function AdminPageClient({
           />
         </div>
       )}
+
+      {activeTab === 'register' && <UserForm onUserCreated={refreshUsers} />}
     </div>
   );
 }

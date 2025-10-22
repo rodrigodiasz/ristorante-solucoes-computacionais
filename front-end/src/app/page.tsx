@@ -1,12 +1,12 @@
-"use client";
-import Link from "next/link";
-import { api } from "../services/api";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+'use client';
+import Link from 'next/link';
+import { api } from '../services/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,35 +16,35 @@ export default function Home() {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const email = formData.get('email');
+    const password = formData.get('password');
 
-    if (email === "" || password === "") {
-      toast.error("Preencha todos os campos");
+    if (email === '' || password === '') {
+      toast.error('Preencha todos os campos');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await api.post("/session", {
+      const response = await api.post('/session', {
         email,
         password,
       });
 
       if (!response.data.token) {
-        toast.error("Erro ao fazer login");
+        toast.error('Erro ao fazer login');
         return;
       }
 
       document.cookie = `session=${response.data.token}; path=/; max-age=${
         60 * 60 * 24 * 30
       }`;
-      toast.success("Login realizado com sucesso!");
-      router.push("/dashboard");
+      toast.success('Login realizado com sucesso!');
+      router.push('/dashboard');
     } catch (err) {
       console.log(err);
-      toast.error("Erro ao fazer login");
+      toast.error('Erro ao fazer login');
     } finally {
       setIsLoading(false);
     }
@@ -121,20 +121,10 @@ export default function Home() {
                   Entrando...
                 </>
               ) : (
-                "Entrar"
+                'Entrar'
               )}
             </Button>
           </form>
-
-          <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            Não possui uma conta?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-emerald-500 hover:text-emerald-600 transition-colors"
-            >
-              Criar conta
-            </Link>
-          </p>
         </div>
       </div>
     </main>
