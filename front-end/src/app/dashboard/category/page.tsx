@@ -38,7 +38,7 @@ export default function Category() {
       );
 
       toast.success('Categoria cadastrada com sucesso!');
-      router.push('/dashboard');
+      router.push('/dashboard/management');
     } catch (error) {
       console.log(error);
       toast.error('Falha ao cadastrar categoria!');

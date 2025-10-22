@@ -90,7 +90,7 @@ export function Form({ categories }: Props) {
       });
       console.log('API response:', response);
       toast.success('Produto registrado com sucesso');
-      router.push('/dashboard');
+      router.push('/dashboard/management');
     } catch (err) {
       console.log(err);
       toast.warning('Falha ao cadastrar esse produto!');
