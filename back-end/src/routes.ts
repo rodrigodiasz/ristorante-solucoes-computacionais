@@ -6,6 +6,8 @@ import { AuthUserController } from './controllers/user/AuthUserController';
 import { DetailUserController } from './controllers/user/DetailUserController';
 import { ListUsersController } from './controllers/user/ListUsersController';
 import { UpdateUserRoleController } from './controllers/user/UpdateUserRoleController';
+import { DeleteUserController } from './controllers/user/DeleteUserController';
+import { UpdateUserController } from './controllers/user/UpdateUserController';
 
 // Permission Controllers
 import { ListPermissionsController } from './controllers/permission/ListPermissionsController';
@@ -67,6 +69,18 @@ router.put(
   isAuthenticated,
   isAdmin,
   new UpdateUserRoleController().handle
+);
+router.put(
+  '/admin/users/:user_id',
+  isAuthenticated,
+  isAdmin,
+  new UpdateUserController().handle
+);
+router.delete(
+  '/admin/users/:user_id',
+  isAuthenticated,
+  isAdmin,
+  new DeleteUserController().handle
 );
 
 // Permission routes

@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { UserProps } from '@/lib/order.type';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EditIcon } from 'lucide-react';
+import { EditIcon, Trash2 } from 'lucide-react';
 import { RoleChangeModal } from './RoleChangeModal';
+import { EditUserModal } from './EditUserModal';
 
 interface UsersTableProps {
   users: UserProps[];
@@ -14,7 +15,8 @@ interface UsersTableProps {
 
 export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
   const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -54,11 +56,21 @@ export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
 
   const handleEditRole = (user: UserProps) => {
     setSelectedUser(user);
-    setIsModalOpen(true);
+    setIsRoleModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleEditUser = (user: UserProps) => {
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseRoleModal = () => {
+    setIsRoleModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
     setSelectedUser(null);
   };
 
@@ -126,15 +138,26 @@ export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
                   {formatDate(user.created_at)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditRole(user)}
-                    className="flex items-center gap-1"
-                  >
-                    <EditIcon size={14} />
-                    Editar
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditRole(user)}
+                      className="flex items-center gap-1"
+                    >
+                      <EditIcon size={14} />
+                      Função
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditUser(user)}
+                      className="flex items-center gap-1"
+                    >
+                      <EditIcon size={14} />
+                      Editar
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -148,10 +171,16 @@ export function UsersTable({ users, onUserUpdated }: UsersTableProps) {
     <>
       {renderTable()}
       <RoleChangeModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isRoleModalOpen}
+        onClose={handleCloseRoleModal}
         user={selectedUser}
         onRoleChanged={handleRoleChanged}
+      />
+      <EditUserModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        user={selectedUser}
+        onUserUpdated={handleRoleChanged}
       />
     </>
   );
