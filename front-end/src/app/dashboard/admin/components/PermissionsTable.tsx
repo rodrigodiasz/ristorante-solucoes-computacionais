@@ -24,7 +24,6 @@ const routeLabels = {
   '/dashboard': 'Dashboard',
   '/dashboard/table': 'Mesas',
   '/dashboard/order': 'Pedidos',
-  '/dashboard/orders': 'Lista de Pedidos',
   '/dashboard/category': 'Categorias',
   '/dashboard/product': 'Cardápio',
   '/dashboard/kitchen': 'Cozinha',
