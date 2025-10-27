@@ -27,6 +27,18 @@ model User {
   @@map("users")
 }
 
+model UsersApp {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  reservations Reservation[]
+  created_at   DateTime?     @default(now())
+  updated_at   DateTime?     @default(now())
+
+  @@map("users_app")
+}
+
 model Category {
   id         String    @id @default(uuid())
   name       String
@@ -88,4 +100,19 @@ model RolePermission {
 
   @@unique([role, route])
   @@map("role_permissions")
+}
+
+model Reservation {
+  id            String    @id @default(uuid())
+  user_app_id   String
+  date          DateTime
+  time          String
+  people_count  Int
+  status        String    @default("PENDING")
+  notes         String?
+  user_app      UsersApp  @relation(fields: [user_app_id], references: [id], onDelete: Cascade)
+  created_at    DateTime? @default(now())
+  updated_at    DateTime? @default(now())
+
+  @@map("reservations")
 }

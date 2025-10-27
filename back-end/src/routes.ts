@@ -9,6 +9,14 @@ import { UpdateUserRoleController } from './controllers/user/UpdateUserRoleContr
 import { DeleteUserController } from './controllers/user/DeleteUserController';
 import { UpdateUserController } from './controllers/user/UpdateUserController';
 
+// UsersApp Controllers
+import { CreateUsersAppController } from './controllers/usersapp/CreateUsersAppController';
+import { AuthUsersAppController } from './controllers/usersapp/AuthUsersAppController';
+import { DetailUsersAppController } from './controllers/usersapp/DetailUsersAppController';
+import { ListUsersAppController } from './controllers/usersapp/ListUsersAppController';
+import { DeleteUsersAppController } from './controllers/usersapp/DeleteUsersAppController';
+import { UpdateUsersAppController } from './controllers/usersapp/UpdateUsersAppController';
+
 // Permission Controllers
 import { ListPermissionsController } from './controllers/permission/ListPermissionsController';
 import { UpdatePermissionController } from './controllers/permission/UpdatePermissionController';
@@ -38,10 +46,20 @@ import { ListOrdersController } from './controllers/order/ListOrdersController';
 import { DetailOrderController } from './controllers/order/DetailOrderController';
 import { FinishOrderController } from './controllers/order/FinishOrderController';
 
+// Reservation Controllers
+import { CreateReservationController } from './controllers/reservation/CreateReservationController';
+import { ListReservationsController } from './controllers/reservation/ListReservationsController';
+import { DetailReservationController } from './controllers/reservation/DetailReservationController';
+import { UpdateReservationController } from './controllers/reservation/UpdateReservationController';
+import { DeleteReservationController } from './controllers/reservation/DeleteReservationController';
+
 // Middlewares
 import { isAuthenticated } from './middlewares/isAuthenticated';
 import { isAdmin } from './middlewares/isAdmin';
 import { upload } from './middlewares/upload';
+
+// Middleware para autenticação de app (caso necessário)
+import { isAuthenticatedApp } from './middlewares/isAuthenticatedApp';
 
 const router = Router();
 
@@ -57,6 +75,15 @@ router.get('/health', (req, res) => {
 router.post('/users', new CreateUserController().handle);
 router.post('/session', new AuthUserController().handle);
 router.get('/me', isAuthenticated, new DetailUserController().handle);
+
+// UsersApp routes
+router.post('/usersapp', new CreateUsersAppController().handle);
+router.post('/usersapp/session', new AuthUsersAppController().handle);
+router.get(
+  '/usersapp/me',
+  isAuthenticatedApp,
+  new DetailUsersAppController().handle
+);
 
 // Admin routes
 router.get(
@@ -84,6 +111,26 @@ router.delete(
   new DeleteUserController().handle
 );
 
+// Admin UsersApp routes
+router.get(
+  '/admin/usersapp',
+  isAuthenticated,
+  isAdmin,
+  new ListUsersAppController().handle
+);
+router.put(
+  '/admin/usersapp/:user_id',
+  isAuthenticated,
+  isAdmin,
+  new UpdateUsersAppController().handle
+);
+router.delete(
+  '/admin/usersapp/:user_id',
+  isAuthenticated,
+  isAdmin,
+  new DeleteUsersAppController().handle
+);
+
 // Permission routes
 router.get(
   '/admin/permissions',
@@ -107,13 +154,17 @@ router.get(
   new GetFirstAllowedRouteController().handle
 );
 
-// Category routes
+// Public endpoints for user-app
+router.get('/products', new ListProductController().handle);
+router.get('/categories', new ListCategoryController().handle);
+router.get('/category/product', new ListByCategoryController().handle);
+
+// Category routes (protected endpoints for admin)
 router.post(
   '/categories',
   isAuthenticated,
   new CreateCategoryController().handle
 );
-router.get('/categories', isAuthenticated, new ListCategoryController().handle);
 router.put(
   '/categories/:id',
   isAuthenticated,
@@ -125,14 +176,13 @@ router.delete(
   new DeleteCategoryController().handle
 );
 
-// Product routes
+// Product routes (protected endpoints for admin)
 router.post(
   '/products',
   isAuthenticated,
   upload.single('file'),
   new CreateProductController().handle
 );
-router.get('/products', isAuthenticated, new ListProductController().handle);
 router.put(
   '/products/:id',
   isAuthenticated,
@@ -142,11 +192,6 @@ router.delete(
   '/products/:id',
   isAuthenticated,
   new DeleteProductController().handle
-);
-router.get(
-  '/category/product',
-  isAuthenticated,
-  new ListByCategoryController().handle
 );
 
 // Order routes
@@ -169,6 +214,60 @@ router.put(
   '/order/finish',
   isAuthenticated,
   new FinishOrderController().handle
+);
+
+// Reservation routes
+router.post(
+  '/reservationsdashboard',
+  isAuthenticated,
+  new CreateReservationController().handle
+);
+router.get(
+  '/reservationsdashboard',
+  isAuthenticated,
+  new ListReservationsController().handle
+);
+router.get(
+  '/reservationsdashboard/:id',
+  isAuthenticated,
+  new DetailReservationController().handle
+);
+router.put(
+  '/reservationsdashboard/:id',
+  isAuthenticated,
+  new UpdateReservationController().handle
+);
+router.delete(
+  '/reservationsdashboard/:id',
+  isAuthenticated,
+  new DeleteReservationController().handle
+);
+
+// Reservation routes (using isAuthenticatedApp for user-app authentication)
+router.post(
+  '/reservations',
+  isAuthenticatedApp,
+  new CreateReservationController().handle
+);
+router.get(
+  '/reservations',
+  isAuthenticatedApp,
+  new ListReservationsController().handle
+);
+router.get(
+  '/reservations/:id',
+  isAuthenticatedApp,
+  new DetailReservationController().handle
+);
+router.put(
+  '/reservations/:id',
+  isAuthenticatedApp,
+  new UpdateReservationController().handle
+);
+router.delete(
+  '/reservations/:id',
+  isAuthenticatedApp,
+  new DeleteReservationController().handle
 );
 
 // API info route
