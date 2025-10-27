@@ -69,3 +69,21 @@ export interface AuthResponse {
   role: 'ADMIN' | 'USER' | 'GARCOM' | 'COZINHA' | 'GERENTE';
   token: string;
 }
+
+export interface ReservationProps {
+  id: string;
+  user_app_id: string;
+  date: string;
+  time: string;
+  people_count: number;
+  status: string;
+  observations?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  user_app: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}

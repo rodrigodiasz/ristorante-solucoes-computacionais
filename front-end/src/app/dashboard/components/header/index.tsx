@@ -12,6 +12,7 @@ import {
   Users,
   Shield,
   Package,
+  Calendar,
 } from 'lucide-react';
 import { deleteCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
@@ -67,9 +68,12 @@ export function Header() {
       case 'GERENTE':
         return linkPath !== '/dashboard/admin';
       case 'GARCOM':
-        return ['/dashboard', '/dashboard/table', '/dashboard/order'].includes(
-          linkPath
-        );
+        return [
+          '/dashboard',
+          '/dashboard/table',
+          '/dashboard/order',
+          '/dashboard/reservations',
+        ].includes(linkPath);
       case 'COZINHA':
         return ['/dashboard/kitchen'].includes(linkPath);
       case 'USER':
@@ -133,6 +137,19 @@ export function Header() {
               >
                 <ShoppingCart size={16} />
                 Pedidos
+              </Link>
+            )}
+            {shouldShowLink('/dashboard/reservations') && (
+              <Link
+                href="/dashboard/reservations"
+                className={`text-sm font-medium transition-colors hover:text-emerald-500 flex items-center gap-2 ${
+                  isActive('/dashboard/reservations')
+                    ? 'text-emerald-500'
+                    : 'text-zinc-600 dark:text-zinc-400'
+                }`}
+              >
+                <Calendar size={16} />
+                Reservas
               </Link>
             )}
             {shouldShowLink('/dashboard/kitchen') && (
