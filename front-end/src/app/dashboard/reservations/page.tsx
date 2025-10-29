@@ -6,7 +6,7 @@ import { ReservationsClient } from './components/ReservationsClient';
 async function getReservations(): Promise<ReservationProps[] | []> {
   try {
     const token = await getCookieServer();
-    const response = await api.get('/reservations', {
+    const response = await api.get('/reservationsdashboard', {
       headers: {
         Authorization: `Bearer ${token}`,
       },

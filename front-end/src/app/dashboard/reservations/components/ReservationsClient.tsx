@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { ReservationProps } from '@/lib/order.type';
 import { ReservationsTable } from './ReservationsTable';
+import { ReservationForm } from './ReservationForm';
 import { api } from '@/services/api';
 import { getCookieClient } from '@/lib/cookieClient';
 import { toast } from 'sonner';
-import { Calendar, RefreshCw } from 'lucide-react';
+import { Calendar, RefreshCw, Plus } from 'lucide-react';
 
 interface ReservationsClientProps {
   initialReservations: ReservationProps[];
@@ -18,6 +19,7 @@ export function ReservationsClient({
   const [reservations, setReservations] =
     useState<ReservationProps[]>(initialReservations);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const refreshReservations = async () => {
     setIsLoading(true);
@@ -49,14 +51,23 @@ export function ReservationsClient({
             Gerencie as reservas de mesas do restaurante
           </p>
         </div>
-        <button
-          onClick={refreshReservations}
-          disabled={isLoading}
-          className="px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-        >
-          <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-          {isLoading ? 'Atualizando...' : 'Atualizar'}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Nova Reserva
+          </button>
+          <button
+            onClick={refreshReservations}
+            disabled={isLoading}
+            className="px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            {isLoading ? 'Atualizando...' : 'Atualizar'}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
@@ -73,6 +84,13 @@ export function ReservationsClient({
           onReservationUpdated={refreshReservations}
         />
       </div>
+
+      {isFormOpen && (
+        <ReservationForm
+          onReservationCreated={refreshReservations}
+          onClose={() => setIsFormOpen(false)}
+        />
+      )}
     </div>
   );
 }
