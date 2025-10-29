@@ -557,7 +557,9 @@ export function ReservationsTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        Mesa {reservation.table_number}
+                        {reservation.table_number
+                          ? `Mesa ${reservation.table_number}`
+                          : 'Não atribuída'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">

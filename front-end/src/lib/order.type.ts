@@ -79,6 +79,7 @@ export interface ReservationProps {
   status: string;
   observations?: string;
   notes?: string;
+  table_number?: number;
   created_at: string;
   updated_at: string;
   user_app: {
