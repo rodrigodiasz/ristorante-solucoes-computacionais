@@ -1,4 +1,4 @@
-import prismaClient from '../../prisma';
+import prismaClient from "../../prisma";
 
 interface CreateReservationRequest {
   user_app_id: string;
@@ -15,10 +15,10 @@ class CreateReservationService {
     date,
     time,
     people_count,
-    status = 'PENDING',
+    status = "PENDING",
     notes,
   }: CreateReservationRequest) {
-    console.log('Creating reservation with data:', {
+    console.log("Creating reservation with data:", {
       user_app_id,
       date,
       time,
@@ -33,11 +33,11 @@ class CreateReservationService {
     });
 
     if (!user) {
-      console.error('User not found:', user_app_id);
-      throw new Error('User not found');
+      console.error("User not found:", user_app_id);
+      throw new Error("User not found");
     }
 
-    console.log('User found:', user.email);
+    console.log("User found:", user.email);
 
     const reservation = await prismaClient.reservation.create({
       data: {
@@ -59,7 +59,7 @@ class CreateReservationService {
       },
     });
 
-    console.log('Reservation created successfully:', reservation.id);
+    console.log("Reservation created successfully:", reservation.id);
 
     return reservation;
   }
