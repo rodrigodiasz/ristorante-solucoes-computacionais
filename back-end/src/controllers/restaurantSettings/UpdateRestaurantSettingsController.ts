@@ -5,16 +5,27 @@ class UpdateRestaurantSettingsController {
   async handle(req: Request, res: Response) {
     const { max_tables } = req.body;
 
-    if (!max_tables || typeof max_tables !== 'number') {
+    if (!max_tables) {
       return res.status(400).json({
-        error: 'O campo max_tables é obrigatório e deve ser um número',
+        error: 'O campo max_tables é obrigatório',
+      });
+    }
+
+    // Converte para número se vier como string
+    const maxTablesNumber = typeof max_tables === 'string' 
+      ? parseInt(max_tables, 10) 
+      : Number(max_tables);
+
+    if (isNaN(maxTablesNumber)) {
+      return res.status(400).json({
+        error: 'O campo max_tables deve ser um número válido',
       });
     }
 
     try {
       const updateRestaurantSettingsService = new UpdateRestaurantSettingsService();
       const settings = await updateRestaurantSettingsService.execute({
-        max_tables: parseInt(max_tables),
+        max_tables: maxTablesNumber,
       });
 
       return res.json(settings);
