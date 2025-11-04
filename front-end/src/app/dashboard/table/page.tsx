@@ -1,7 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { api } from "@/services/api";
 import { getCookieClient } from "@/lib/cookieClient";
 import { toast } from "sonner";
@@ -12,11 +19,46 @@ export default function TableOpen() {
   const [number, setNumber] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [maxTables, setMaxTables] = useState(5);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [openTables, setOpenTables] = useState<number[]>([]);
   const router = useRouter();
+
+  useEffect(() => {
+    async function loadSettings() {
+      const token = await getCookieClient();
+      try {
+        // Busca configurações do restaurante
+        const settingsResponse = await api.get("/settings", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setMaxTables(settingsResponse.data.max_tables || 5);
+
+        // Busca mesas já abertas
+        const ordersResponse = await api.get("/orders", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const openTablesList = ordersResponse.data
+          .filter((order: any) => order.draft)
+          .map((order: any) => order.table);
+        setOpenTables(openTablesList);
+      } catch (err) {
+        console.error("Erro ao carregar configurações:", err);
+        toast.error("Erro ao carregar configurações");
+      } finally {
+        setLoadingSettings(false);
+      }
+    }
+    loadSettings();
+  }, []);
 
   async function openOrder() {
     if (number === "") {
-      toast.error("Por favor, insira o número da mesa");
+      toast.error("Por favor, selecione o número da mesa");
       return;
     }
 
@@ -24,18 +66,6 @@ export default function TableOpen() {
     const token = await getCookieClient();
 
     try {
-      // Verifica se já existe um pedido (mesa) com o mesmo número
-      const response = await api.get("/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const orders = response.data;
-      if (orders.some((order: any) => order.table === Number(number))) {
-        toast.error("Mesa já cadastrada");
-        return;
-      }
-
       // Se não existir, cria o pedido (mesa)
       await api.post(
         "/order",
@@ -51,8 +81,10 @@ export default function TableOpen() {
       );
       toast.success("Mesa aberta com sucesso");
       router.push("/dashboard");
-    } catch (err) {
-      toast.error("Erro ao abrir mesa");
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.error || "Erro ao abrir mesa";
+      toast.error(errorMessage);
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -82,14 +114,40 @@ export default function TableOpen() {
             >
               Número da Mesa
             </label>
-            <Input
-              id="number"
-              type="number"
-              placeholder="Ex: 1, 2, 3..."
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              className="w-full"
-            />
+            {loadingSettings ? (
+              <Input
+                disabled
+                placeholder="Carregando..."
+                className="w-full"
+              />
+            ) : (
+              <Select
+                value={number}
+                onValueChange={setNumber}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione a mesa" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: maxTables }, (_, i) => i + 1).map(
+                    (tableNum) => {
+                      const isOpen = openTables.includes(tableNum);
+                      return (
+                        <SelectItem
+                          key={tableNum}
+                          value={tableNum.toString()}
+                          disabled={isOpen}
+                        >
+                          Mesa {tableNum}
+                          {isOpen && " (Aberta)"}
+                        </SelectItem>
+                      );
+                    }
+                  )}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">

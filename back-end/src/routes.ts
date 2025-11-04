@@ -23,6 +23,10 @@ import { UpdatePermissionController } from './controllers/permission/UpdatePermi
 import { CheckPermissionController } from './controllers/permission/CheckPermissionController';
 import { GetFirstAllowedRouteController } from './controllers/permission/GetFirstAllowedRouteController';
 
+// Restaurant Settings Controllers
+import { GetRestaurantSettingsController } from './controllers/restaurantSettings/GetRestaurantSettingsController';
+import { UpdateRestaurantSettingsController } from './controllers/restaurantSettings/UpdateRestaurantSettingsController';
+
 // Category Controllers
 import { CreateCategoryController } from './controllers/category/CreateCategoryController';
 import { ListCategoryController } from './controllers/category/ListCategoryController';
@@ -152,6 +156,19 @@ router.get('/permissions/check', new CheckPermissionController().handle);
 router.get(
   '/permissions/first-route',
   new GetFirstAllowedRouteController().handle
+);
+
+// Restaurant Settings routes
+router.get(
+  '/settings',
+  isAuthenticated,
+  new GetRestaurantSettingsController().handle
+);
+router.put(
+  '/admin/settings',
+  isAuthenticated,
+  isAdmin,
+  new UpdateRestaurantSettingsController().handle
 );
 
 // Public endpoints for user-app
