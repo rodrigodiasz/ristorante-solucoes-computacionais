@@ -105,6 +105,7 @@ model RolePermission {
 model Reservation {
   id            String    @id @default(uuid())
   user_app_id   String
+  table_number  Int       @default(0)
   date          DateTime
   time          String
   people_count  Int

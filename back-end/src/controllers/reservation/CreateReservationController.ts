@@ -1,23 +1,23 @@
-import { Request, Response } from 'express';
-import { CreateReservationService } from '../../services/reservation/CreateReservationService';
+import { Request, Response } from "express";
+import { CreateReservationService } from "../../services/reservation/CreateReservationService";
 
 class CreateReservationController {
   async handle(req: Request, res: Response) {
-    console.log('CreateReservationController - Request body:', req.body);
+    console.log("CreateReservationController - Request body:", req.body);
     console.log(
-      'CreateReservationController - User ID from token:',
+      "CreateReservationController - User ID from token:",
       req.user_id
     );
 
     const { date, time, people_count, status, notes, user_app_id } = req.body;
-    
+
     // Se user_app_id não foi fornecido no body, usar o req.user_id (para quando usuário do app cria)
     // Se user_app_id foi fornecido no body, usar ele (para quando admin cria pelo dashboard)
     const finalUserAppId = user_app_id || req.user_id;
 
     if (!finalUserAppId) {
-      console.error('No user ID found in request');
-      return res.status(400).json({ error: 'User ID is required' });
+      console.error("No user ID found in request");
+      return res.status(400).json({ error: "User ID is required" });
     }
 
     const createReservationService = new CreateReservationService();
@@ -32,10 +32,10 @@ class CreateReservationController {
         notes,
       });
 
-      console.log('Reservation created, returning to client:', reservation.id);
+      console.log("Reservation created, returning to client:", reservation.id);
       return res.json(reservation);
     } catch (error: any) {
-      console.error('Error creating reservation:', error);
+      console.error("Error creating reservation:", error);
       return res.status(400).json({ error: error.message });
     }
   }
