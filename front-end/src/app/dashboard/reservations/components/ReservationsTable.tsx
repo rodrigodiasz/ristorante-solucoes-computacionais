@@ -72,7 +72,7 @@ export function ReservationsTable({
     try {
       const token = await getCookieClient();
       await api.put(
-        `/reservations/${reservationId}`,
+        `/reservationsdashboard/${reservationId}`,
         { status: newStatus },
         {
           headers: {
@@ -123,12 +123,12 @@ export function ReservationsTable({
     try {
       const token = await getCookieClient();
       await api.put(
-        `/reservations/${editingReservation.id}`,
+        `/reservationsdashboard/${editingReservation.id}`,
         {
           date: editForm.date,
           time: editForm.time,
           people_count: editForm.people_count,
-          observations: editForm.observations,
+          notes: editForm.observations,
         },
         {
           headers: {
@@ -156,7 +156,7 @@ export function ReservationsTable({
     try {
       const token = await getCookieClient();
       await api.put(
-        `/reservations/${reservationId}`,
+        `/reservationsdashboard/${reservationId}`,
         { status: 'CANCELLED' },
         {
           headers: {
@@ -187,7 +187,7 @@ export function ReservationsTable({
 
     try {
       const token = await getCookieClient();
-      await api.delete(`/reservations/${reservationId}`, {
+      await api.delete(`/reservationsdashboard/${reservationId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
