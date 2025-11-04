@@ -42,6 +42,7 @@ class CreateReservationService {
     const reservation = await prismaClient.reservation.create({
       data: {
         user_app_id,
+        table_number: 0, // Valor padrão explícito
         date,
         time,
         people_count,
