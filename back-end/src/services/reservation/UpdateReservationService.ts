@@ -2,7 +2,6 @@ import prismaClient from '../../prisma';
 
 interface UpdateReservationRequest {
   reservation_id: string;
-  table_number?: number;
   date?: Date;
   time?: string;
   people_count?: number;
@@ -13,7 +12,6 @@ interface UpdateReservationRequest {
 class UpdateReservationService {
   async execute({
     reservation_id,
-    table_number,
     date,
     time,
     people_count,
@@ -30,10 +28,6 @@ class UpdateReservationService {
     }
 
     const updateData: any = {};
-
-    if (table_number !== undefined) {
-      updateData.table_number = table_number;
-    }
 
     if (date) {
       updateData.date = date;

@@ -4,7 +4,7 @@ import { UpdateReservationService } from '../../services/reservation/UpdateReser
 class UpdateReservationController {
   async handle(req: Request, res: Response) {
     const { id } = req.params;
-    const { table_number, date, time, people_count, status, notes } = req.body;
+    const { date, time, people_count, status, notes } = req.body;
 
     if (!id) {
       return res.status(400).json({ error: 'Reservation ID is required' });
@@ -15,7 +15,6 @@ class UpdateReservationController {
     try {
       const updatedReservation = await updateReservationService.execute({
         reservation_id: id,
-        table_number,
         date: date ? new Date(date) : undefined,
         time,
         people_count,
