@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ReservationProps } from '@/lib/order.type';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Check, X, Clock, Edit2, Trash2 } from 'lucide-react';
-import { api } from '@/services/api';
-import { getCookieClient } from '@/lib/cookieClient';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { ReservationProps } from "@/lib/order.type";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Check, X, Clock, Edit2, Trash2 } from "lucide-react";
+import { api } from "@/services/api";
+import { getCookieClient } from "@/lib/cookieClient";
+import { toast } from "sonner";
 
 interface ReservationsTableProps {
   reservations: ReservationProps[];
@@ -22,17 +22,17 @@ export function ReservationsTable({
   const [editingReservation, setEditingReservation] =
     useState<ReservationProps | null>(null);
   const [editForm, setEditForm] = useState({
-    date: '',
-    time: '',
+    date: "",
+    time: "",
     people_count: 0,
-    observations: '',
+    observations: "",
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
@@ -43,21 +43,21 @@ export function ReservationsTable({
   const getStatusBadge = (status: string) => {
     const variants: Record<
       string,
-      'default' | 'secondary' | 'outline' | 'destructive'
+      "default" | "secondary" | "outline" | "destructive"
     > = {
-      PENDING: 'outline',
-      CONFIRMED: 'default',
-      CANCELLED: 'destructive',
+      PENDING: "outline",
+      CONFIRMED: "default",
+      CANCELLED: "destructive",
     };
 
     const statusLabels: Record<string, string> = {
-      PENDING: 'Pendente',
-      CONFIRMED: 'Confirmada',
-      CANCELLED: 'Cancelada',
+      PENDING: "Pendente",
+      CONFIRMED: "Confirmada",
+      CANCELLED: "Cancelada",
     };
 
     return (
-      <Badge variant={variants[status] || 'outline'}>
+      <Badge variant={variants[status] || "outline"}>
         {statusLabels[status] || status}
       </Badge>
     );
@@ -83,13 +83,13 @@ export function ReservationsTable({
 
       toast.success(
         `Reserva ${
-          newStatus === 'CONFIRMED' ? 'confirmada' : 'cancelada'
+          newStatus === "CONFIRMED" ? "confirmada" : "cancelada"
         } com sucesso!`
       );
       onReservationUpdated();
     } catch (error: any) {
-      console.error('Erro ao atualizar reserva:', error);
-      toast.error(error.response?.data?.error || 'Erro ao atualizar reserva');
+      console.error("Erro ao atualizar reserva:", error);
+      toast.error(error.response?.data?.error || "Erro ao atualizar reserva");
     } finally {
       setUpdating(null);
     }
@@ -97,21 +97,30 @@ export function ReservationsTable({
 
   const handleOpenEdit = (reservation: ReservationProps) => {
     setEditingReservation(reservation);
+
+    // Converter a data para o formato YYYY-MM-DD para o input
+    // Usar UTC para evitar problemas de timezone
+    const dateObj = new Date(reservation.date);
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
     setEditForm({
-      date: reservation.date,
+      date: formattedDate,
       time: reservation.time,
       people_count: reservation.people_count,
-      observations: reservation.observations || '',
+      observations: reservation.observations || reservation.notes || "",
     });
   };
 
   const handleCloseEdit = () => {
     setEditingReservation(null);
     setEditForm({
-      date: '',
-      time: '',
+      date: "",
+      time: "",
       people_count: 0,
-      observations: '',
+      observations: "",
     });
   };
 
@@ -137,19 +146,19 @@ export function ReservationsTable({
         }
       );
 
-      toast.success('Reserva atualizada com sucesso!');
+      toast.success("Reserva atualizada com sucesso!");
       handleCloseEdit();
       onReservationUpdated();
     } catch (error: any) {
-      console.error('Erro ao atualizar reserva:', error);
-      toast.error(error.response?.data?.error || 'Erro ao atualizar reserva');
+      console.error("Erro ao atualizar reserva:", error);
+      toast.error(error.response?.data?.error || "Erro ao atualizar reserva");
     } finally {
       setUpdating(null);
     }
   };
 
   const handleDelete = async (reservationId: string) => {
-    if (!confirm('Tem certeza que deseja cancelar esta reserva?')) return;
+    if (!confirm("Tem certeza que deseja cancelar esta reserva?")) return;
 
     setUpdating(reservationId);
 
@@ -157,7 +166,7 @@ export function ReservationsTable({
       const token = await getCookieClient();
       await api.put(
         `/reservationsdashboard/${reservationId}`,
-        { status: 'CANCELLED' },
+        { status: "CANCELLED" },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -165,11 +174,11 @@ export function ReservationsTable({
         }
       );
 
-      toast.success('Reserva cancelada com sucesso!');
+      toast.success("Reserva cancelada com sucesso!");
       onReservationUpdated();
     } catch (error: any) {
-      console.error('Erro ao cancelar reserva:', error);
-      toast.error(error.response?.data?.error || 'Erro ao cancelar reserva');
+      console.error("Erro ao cancelar reserva:", error);
+      toast.error(error.response?.data?.error || "Erro ao cancelar reserva");
     } finally {
       setUpdating(null);
     }
@@ -178,7 +187,7 @@ export function ReservationsTable({
   const handleCompleteReservation = async (reservationId: string) => {
     if (
       !confirm(
-        'Confirmar a chegada do cliente e concluir a reserva? A reserva será deletada do banco de dados.'
+        "Confirmar a chegada do cliente e concluir a reserva? A reserva será deletada do banco de dados."
       )
     )
       return;
@@ -193,23 +202,23 @@ export function ReservationsTable({
         },
       });
 
-      toast.success('Reserva concluída e removida com sucesso!');
+      toast.success("Reserva concluída e removida com sucesso!");
       onReservationUpdated();
     } catch (error: any) {
-      console.error('Erro ao concluir reserva:', error);
-      toast.error(error.response?.data?.error || 'Erro ao concluir reserva');
+      console.error("Erro ao concluir reserva:", error);
+      toast.error(error.response?.data?.error || "Erro ao concluir reserva");
     } finally {
       setUpdating(null);
     }
   };
 
   const getReservationsByStatus = (status: string) => {
-    return reservations.filter(r => r.status === status);
+    return reservations.filter((r) => r.status === status);
   };
 
-  const pendingReservations = getReservationsByStatus('PENDING');
-  const confirmedReservations = getReservationsByStatus('CONFIRMED');
-  const cancelledReservations = getReservationsByStatus('CANCELLED');
+  const pendingReservations = getReservationsByStatus("PENDING");
+  const confirmedReservations = getReservationsByStatus("CONFIRMED");
+  const cancelledReservations = getReservationsByStatus("CANCELLED");
 
   if (reservations.length === 0) {
     return (
@@ -242,7 +251,7 @@ export function ReservationsTable({
                 <input
                   type="date"
                   value={editForm.date}
-                  onChange={e =>
+                  onChange={(e) =>
                     setEditForm({ ...editForm, date: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -256,7 +265,7 @@ export function ReservationsTable({
                 <input
                   type="time"
                   value={editForm.time}
-                  onChange={e =>
+                  onChange={(e) =>
                     setEditForm({ ...editForm, time: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -271,7 +280,7 @@ export function ReservationsTable({
                   type="number"
                   min="1"
                   value={editForm.people_count}
-                  onChange={e =>
+                  onChange={(e) =>
                     setEditForm({
                       ...editForm,
                       people_count: parseInt(e.target.value),
@@ -287,7 +296,7 @@ export function ReservationsTable({
                 </label>
                 <textarea
                   value={editForm.observations}
-                  onChange={e =>
+                  onChange={(e) =>
                     setEditForm({ ...editForm, observations: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -302,7 +311,7 @@ export function ReservationsTable({
                 disabled={updating === editingReservation.id}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
               >
-                {updating === editingReservation.id ? 'Salvando...' : 'Salvar'}
+                {updating === editingReservation.id ? "Salvando..." : "Salvar"}
               </Button>
               <Button
                 onClick={handleCloseEdit}
@@ -350,7 +359,7 @@ export function ReservationsTable({
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {pendingReservations.map(reservation => (
+                {pendingReservations.map((reservation) => (
                   <tr
                     key={reservation.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -378,14 +387,14 @@ export function ReservationsTable({
                       {reservation.people_count} pessoa(s)
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                      {reservation.observations || reservation.notes || '-'}
+                      {reservation.observations || reservation.notes || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
                         <Button
                           size="sm"
                           onClick={() =>
-                            handleUpdateStatus(reservation.id, 'CONFIRMED')
+                            handleUpdateStatus(reservation.id, "CONFIRMED")
                           }
                           disabled={updating === reservation.id}
                           className="bg-emerald-500 hover:bg-emerald-600 text-white"
@@ -397,7 +406,7 @@ export function ReservationsTable({
                           size="sm"
                           variant="destructive"
                           onClick={() =>
-                            handleUpdateStatus(reservation.id, 'CANCELLED')
+                            handleUpdateStatus(reservation.id, "CANCELLED")
                           }
                           disabled={updating === reservation.id}
                         >
@@ -443,7 +452,7 @@ export function ReservationsTable({
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {confirmedReservations.map(reservation => (
+                {confirmedReservations.map((reservation) => (
                   <tr
                     key={reservation.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -542,7 +551,7 @@ export function ReservationsTable({
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {cancelledReservations.map(reservation => (
+                {cancelledReservations.map((reservation) => (
                   <tr
                     key={reservation.id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700 opacity-60"
@@ -559,7 +568,7 @@ export function ReservationsTable({
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {reservation.table_number
                           ? `Mesa ${reservation.table_number}`
-                          : 'Não atribuída'}
+                          : "Não atribuída"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">

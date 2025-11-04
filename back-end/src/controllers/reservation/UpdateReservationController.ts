@@ -13,9 +13,18 @@ class UpdateReservationController {
     const updateReservationService = new UpdateReservationService();
 
     try {
+      // Converter a data para o formato correto
+      let dateObj: Date | undefined;
+      if (date) {
+        dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) {
+          return res.status(400).json({ error: 'Data inválida' });
+        }
+      }
+
       const updatedReservation = await updateReservationService.execute({
         reservation_id: id,
-        date: date ? new Date(date) : undefined,
+        date: dateObj,
         time,
         people_count,
         status,
@@ -23,6 +32,7 @@ class UpdateReservationController {
       });
       return res.json(updatedReservation);
     } catch (error: any) {
+      console.error('Error updating reservation:', error);
       return res.status(400).json({ error: error.message });
     }
   }
