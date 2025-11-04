@@ -132,19 +132,10 @@ export function ReservationsTable({
     try {
       const token = await getCookieClient();
 
-      // Garantir que a data está no formato YYYY-MM-DD
-      const dateToSend = editForm.date || "";
-
-      console.log("Sending update request:", {
-        date: dateToSend,
-        time: editForm.time,
-        people_count: editForm.people_count,
-      });
-
       await api.put(
         `/reservationsdashboard/${editingReservation.id}`,
         {
-          date: dateToSend,
+          date: editForm.date,
           time: editForm.time,
           people_count: editForm.people_count,
           notes: editForm.observations,

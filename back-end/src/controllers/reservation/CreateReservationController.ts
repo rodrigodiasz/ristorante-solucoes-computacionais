@@ -3,12 +3,6 @@ import { CreateReservationService } from "../../services/reservation/CreateReser
 
 class CreateReservationController {
   async handle(req: Request, res: Response) {
-    console.log("CreateReservationController - Request body:", req.body);
-    console.log(
-      "CreateReservationController - User ID from token:",
-      req.user_id
-    );
-
     const { date, time, people_count, status, notes, user_app_id } = req.body;
 
     // Validações básicas
@@ -23,7 +17,6 @@ class CreateReservationController {
     const finalUserAppId = user_app_id || req.user_id;
 
     if (!finalUserAppId) {
-      console.error("No user ID found in request");
       return res.status(400).json({ error: "User ID is required" });
     }
 
@@ -31,7 +24,18 @@ class CreateReservationController {
 
     try {
       // Converter a data para o formato correto
-      const dateObj = new Date(date);
+      let dateObj: Date;
+
+      // Se a data vem no formato YYYY-MM-DD, criar Date em UTC
+      // para evitar problemas de timezone
+      if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Formato YYYY-MM-DD - criar Date em UTC às 12:00:00 para evitar mudança de dia
+        const [year, month, day] = date.split("-").map(Number);
+        dateObj = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+      } else {
+        dateObj = new Date(date);
+      }
+
       if (isNaN(dateObj.getTime())) {
         return res.status(400).json({ error: "Data inválida" });
       }
@@ -45,15 +49,10 @@ class CreateReservationController {
         notes: notes || undefined,
       });
 
-      console.log("Reservation created, returning to client:", reservation.id);
       return res.json(reservation);
     } catch (error: any) {
-      console.error("Error creating reservation:", error);
-      console.error("Error stack:", error.stack);
       return res.status(400).json({
         error: error.message || "Erro ao criar reserva",
-        details:
-          process.env.NODE_ENV === "development" ? error.stack : undefined,
       });
     }
   }

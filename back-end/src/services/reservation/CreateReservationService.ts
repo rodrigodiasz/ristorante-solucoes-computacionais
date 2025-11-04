@@ -18,26 +18,14 @@ class CreateReservationService {
     status = "PENDING",
     notes,
   }: CreateReservationRequest) {
-    console.log("Creating reservation with data:", {
-      user_app_id,
-      date,
-      time,
-      people_count,
-      status,
-      notes,
-    });
-
     // Verificar se o usuário existe
     const user = await prismaClient.usersApp.findUnique({
       where: { id: user_app_id },
     });
 
     if (!user) {
-      console.error("User not found:", user_app_id);
       throw new Error("User not found");
     }
-
-    console.log("User found:", user.email);
 
     const reservation = await prismaClient.reservation.create({
       data: {
@@ -58,8 +46,6 @@ class CreateReservationService {
         },
       },
     });
-
-    console.log("Reservation created successfully:", reservation.id);
 
     return reservation;
   }
