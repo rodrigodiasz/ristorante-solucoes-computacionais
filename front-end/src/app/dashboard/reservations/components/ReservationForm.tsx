@@ -1,12 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '@/services/api';
 import { getCookieClient } from '@/lib/cookieClient';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar, Clock, Users, FileText, Loader2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar, Clock, Users, FileText, Loader2, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ReservationFormProps {
@@ -19,12 +26,37 @@ export function ReservationForm({
   onClose,
 }: ReservationFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [usersApp, setUsersApp] = useState<Array<{ id: string; name: string; email: string }>>([]);
   const [formData, setFormData] = useState({
+    user_app_id: '',
     date: '',
     time: '',
     people_count: '',
     notes: '',
   });
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      try {
+        const token = await getCookieClient();
+        const response = await api.get('/admin/usersapp', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUsersApp(response.data);
+      } catch (error: any) {
+        console.error('Erro ao buscar usuários:', error);
+        toast.error('Erro ao carregar lista de usuários');
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -36,7 +68,7 @@ export function ReservationForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.date || !formData.time || !formData.people_count) {
+    if (!formData.user_app_id || !formData.date || !formData.time || !formData.people_count) {
       toast.error('Preencha todos os campos obrigatórios');
       return;
     }
@@ -54,6 +86,7 @@ export function ReservationForm({
       await api.post(
         '/reservationsdashboard',
         {
+          user_app_id: formData.user_app_id,
           date: formData.date,
           time: formData.time,
           people_count: peopleCount,
@@ -73,6 +106,7 @@ export function ReservationForm({
 
       // Reset form
       setFormData({
+        user_app_id: '',
         date: '',
         time: '',
         people_count: '',
@@ -107,6 +141,31 @@ export function ReservationForm({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Cliente *
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+              <Select
+                value={formData.user_app_id}
+                onValueChange={(value) => handleInputChange('user_app_id', value)}
+                disabled={isLoadingUsers || isLoading}
+              >
+                <SelectTrigger className="pl-10 w-full dark:bg-gray-700 bg-white text-gray-900 dark:text-white border-gray-200 dark:border-gray-600">
+                  <SelectValue placeholder={isLoadingUsers ? "Carregando usuários..." : "Selecione o cliente"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {usersApp.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Data da Reserva *
@@ -189,7 +248,7 @@ export function ReservationForm({
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isLoadingUsers || !formData.user_app_id || usersApp.length === 0}
               className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white"
             >
               {isLoading ? (

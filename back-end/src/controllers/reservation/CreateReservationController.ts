@@ -9,10 +9,13 @@ class CreateReservationController {
       req.user_id
     );
 
-    const { date, time, people_count, status, notes } = req.body;
-    const user_app_id = req.user_id;
+    const { date, time, people_count, status, notes, user_app_id } = req.body;
+    
+    // Se user_app_id não foi fornecido no body, usar o req.user_id (para quando usuário do app cria)
+    // Se user_app_id foi fornecido no body, usar ele (para quando admin cria pelo dashboard)
+    const finalUserAppId = user_app_id || req.user_id;
 
-    if (!user_app_id) {
+    if (!finalUserAppId) {
       console.error('No user ID found in request');
       return res.status(400).json({ error: 'User ID is required' });
     }
@@ -21,7 +24,7 @@ class CreateReservationController {
 
     try {
       const reservation = await createReservationService.execute({
-        user_app_id,
+        user_app_id: finalUserAppId,
         date: new Date(date),
         time,
         people_count,
