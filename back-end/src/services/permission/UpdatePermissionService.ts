@@ -8,29 +8,22 @@ interface UpdatePermissionRequest {
 
 class UpdatePermissionService {
   async execute({ role, route, can_access }: UpdatePermissionRequest) {
-    const existingPermission = await prismaClient.rolePermission.findUnique({
+    // Usa upsert para criar ou atualizar a permissão
+    const updatedPermission = await prismaClient.rolePermission.upsert({
       where: {
         role_route: {
           role: role,
           route: route,
         },
       },
-    });
-
-    if (!existingPermission) {
-      throw new Error('Permissão não encontrada');
-    }
-
-    const updatedPermission = await prismaClient.rolePermission.update({
-      where: {
-        role_route: {
-          role: role,
-          route: route,
-        },
-      },
-      data: {
+      update: {
         can_access: can_access,
         updated_at: new Date(),
+      },
+      create: {
+        role: role,
+        route: route,
+        can_access: can_access,
       },
     });
 

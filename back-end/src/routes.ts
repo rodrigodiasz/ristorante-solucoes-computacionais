@@ -48,6 +48,7 @@ import { RemoveItemController } from './controllers/order/RemoveItemController';
 import { SendOrderController } from './controllers/order/SendOrderController';
 import { ListOrdersController } from './controllers/order/ListOrdersController';
 import { DetailOrderController } from './controllers/order/DetailOrderController';
+import { ListOpenTablesController } from './controllers/order/ListOpenTablesController';
 import { FinishOrderController } from './controllers/order/FinishOrderController';
 
 // Reservation Controllers
@@ -222,6 +223,7 @@ router.delete(
 );
 router.put('/order/send', isAuthenticated, new SendOrderController().handle);
 router.get('/orders', isAuthenticated, new ListOrdersController().handle);
+router.get('/orders/open-tables', isAuthenticated, new ListOpenTablesController().handle);
 router.get(
   '/order/detail',
   isAuthenticated,

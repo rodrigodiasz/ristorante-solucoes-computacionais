@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,9 +24,31 @@ export default function TableOpen() {
   const [openTables, setOpenTables] = useState<number[]>([]);
   const router = useRouter();
 
+  const loadOpenTables = useCallback(async () => {
+    try {
+      const token = await getCookieClient();
+      const openTablesResponse = await api.get("/orders/open-tables", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const openTablesData = openTablesResponse.data || [];
+      // Garante que todos os valores sejam números
+      const normalizedTables = openTablesData.map((table: any) =>
+        Number(table)
+      );
+      setOpenTables(normalizedTables);
+      return normalizedTables;
+    } catch (err: any) {
+      console.error("Erro ao carregar mesas abertas:", err);
+      return [];
+    }
+  }, []);
+
   useEffect(() => {
     async function loadSettings() {
       const token = await getCookieClient();
+
       try {
         // Busca configurações do restaurante
         const settingsResponse = await api.get("/settings", {
@@ -37,16 +59,8 @@ export default function TableOpen() {
         setMaxTables(settingsResponse.data.max_tables || 5);
 
         // Busca mesas já abertas
-        const ordersResponse = await api.get("/orders", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const openTablesList = ordersResponse.data
-          .filter((order: any) => order.draft)
-          .map((order: any) => order.table);
-        setOpenTables(openTablesList);
-      } catch (err) {
+        await loadOpenTables();
+      } catch (err: any) {
         console.error("Erro ao carregar configurações:", err);
         toast.error("Erro ao carregar configurações");
       } finally {
@@ -54,11 +68,34 @@ export default function TableOpen() {
       }
     }
     loadSettings();
-  }, []);
+
+    // Atualiza mesas abertas quando a página recebe foco
+    const handleFocus = () => {
+      if (!loadingSettings) {
+        loadOpenTables();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [loadingSettings, loadOpenTables]);
 
   async function openOrder() {
     if (number === "") {
       toast.error("Por favor, selecione o número da mesa");
+      return;
+    }
+
+    const tableNum = Number(number);
+
+    // Verifica se a mesa já está aberta (garante comparação numérica)
+    const isTableOpen = openTables.some(
+      (openTable) => Number(openTable) === tableNum
+    );
+    if (isTableOpen) {
+      toast.error("Esta mesa já está aberta");
       return;
     }
 
@@ -70,7 +107,7 @@ export default function TableOpen() {
       await api.post(
         "/order",
         {
-          table: Number(number),
+          table: tableNum,
           name: name ? name : undefined,
         },
         {
@@ -80,12 +117,14 @@ export default function TableOpen() {
         }
       );
       toast.success("Mesa aberta com sucesso");
+
+      // Atualiza a lista de mesas abertas imediatamente
+      await loadOpenTables();
+
       router.push("/dashboard");
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.error || "Erro ao abrir mesa";
+      const errorMessage = err.response?.data?.error || "Erro ao abrir mesa";
       toast.error(errorMessage);
-      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -115,15 +154,22 @@ export default function TableOpen() {
               Número da Mesa
             </label>
             {loadingSettings ? (
-              <Input
-                disabled
-                placeholder="Carregando..."
-                className="w-full"
-              />
+              <Input disabled placeholder="Carregando..." className="w-full" />
             ) : (
               <Select
                 value={number}
-                onValueChange={setNumber}
+                onValueChange={(value) => {
+                  const tableNum = Number(value);
+                  // Impede seleção de mesas abertas (garante comparação numérica)
+                  const isTableOpen = openTables.some(
+                    (openTable) => Number(openTable) === tableNum
+                  );
+                  if (isTableOpen) {
+                    toast.error("Esta mesa já está ocupada");
+                    return;
+                  }
+                  setNumber(value);
+                }}
                 disabled={isLoading}
               >
                 <SelectTrigger className="w-full">
@@ -132,15 +178,23 @@ export default function TableOpen() {
                 <SelectContent>
                   {Array.from({ length: maxTables }, (_, i) => i + 1).map(
                     (tableNum) => {
-                      const isOpen = openTables.includes(tableNum);
+                      // Garante que ambos sejam números para comparação correta
+                      const isOpen = openTables.some(
+                        (openTable) => Number(openTable) === tableNum
+                      );
                       return (
                         <SelectItem
                           key={tableNum}
                           value={tableNum.toString()}
                           disabled={isOpen}
+                          className={
+                            isOpen
+                              ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                              : "cursor-pointer"
+                          }
                         >
                           Mesa {tableNum}
-                          {isOpen && " (Aberta)"}
+                          {isOpen && " (Ocupada)"}
                         </SelectItem>
                       );
                     }
@@ -189,4 +243,3 @@ export default function TableOpen() {
     </main>
   );
 }
-

@@ -1,24 +1,28 @@
 import prismaClient from "../../prisma";
 
-class ListOrdersService {
+class ListOpenTablesService {
   async execute() {
-    // Retorna todas as mesas abertas:
+    // Busca mesas ocupadas:
     // - draft: true (mesas abertas, ainda em rascunho)
     // - draft: false, status: false (pedidos enviados para cozinha, ainda não finalizados)
-    const orders = await prismaClient.order.findMany({
+    const openOrders = await prismaClient.order.findMany({
       where: {
         OR: [
           { draft: true }, // Mesas abertas
           { draft: false, status: false }, // Pedidos enviados mas não finalizados
         ],
       },
+      select: {
+        table: true,
+      },
       orderBy: {
-        created_at: "desc",
+        table: "asc",
       },
     });
 
-    return orders;
+    // Retorna apenas os números das mesas abertas
+    return openOrders.map((order) => order.table);
   }
 }
 
-export { ListOrdersService };
+export { ListOpenTablesService };
