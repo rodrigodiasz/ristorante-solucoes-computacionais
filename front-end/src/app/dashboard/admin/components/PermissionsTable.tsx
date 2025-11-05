@@ -28,6 +28,7 @@ const routeLabels = {
   '/dashboard/product': 'Cardápio',
   '/dashboard/kitchen': 'Cozinha',
   '/dashboard/admin': 'Admin',
+  '/dashboard/reservations': 'Reservas',
 };
 
 export function PermissionsTable({

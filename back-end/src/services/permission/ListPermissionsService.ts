@@ -8,6 +8,7 @@ const ROUTES = [
   '/dashboard/product',
   '/dashboard/kitchen',
   '/dashboard/admin',
+  '/dashboard/reservations',
 ];
 
 const ROLES = ['ADMIN', 'USER', 'GARCOM', 'COZINHA', 'GERENTE'] as const;
@@ -22,6 +23,7 @@ const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     '/dashboard/product': true,
     '/dashboard/kitchen': true,
     '/dashboard/admin': true,
+    '/dashboard/reservations': true,
   },
   GERENTE: {
     '/dashboard': true,
@@ -31,6 +33,7 @@ const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     '/dashboard/product': true,
     '/dashboard/kitchen': true,
     '/dashboard/admin': false,
+    '/dashboard/reservations': true,
   },
   GARCOM: {
     '/dashboard': true,
@@ -40,6 +43,7 @@ const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     '/dashboard/product': false,
     '/dashboard/kitchen': false,
     '/dashboard/admin': false,
+    '/dashboard/reservations': true,
   },
   COZINHA: {
     '/dashboard': false,
@@ -49,6 +53,7 @@ const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     '/dashboard/product': false,
     '/dashboard/kitchen': true,
     '/dashboard/admin': false,
+    '/dashboard/reservations': false,
   },
   USER: {
     '/dashboard': true,
@@ -58,6 +63,7 @@ const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     '/dashboard/product': true,
     '/dashboard/kitchen': false,
     '/dashboard/admin': false,
+    '/dashboard/reservations': false,
   },
 };
 
@@ -79,7 +85,53 @@ class ListPermissionsService {
       return this.groupPermissions(permissions);
     }
 
-    return this.groupPermissions(existingPermissions);
+    // Verifica se falta alguma rota nas permissões existentes e adiciona
+    await this.syncMissingPermissions(existingPermissions);
+
+    // Busca novamente após sincronizar
+    const permissions = await prismaClient.rolePermission.findMany({
+      orderBy: [{ role: 'asc' }, { route: 'asc' }],
+    });
+
+    return this.groupPermissions(permissions);
+  }
+
+  private async syncMissingPermissions(existingPermissions: Array<{ role: string; route: string }>) {
+    const existingRoutesByRole = new Map<string, Set<string>>();
+    
+    // Agrupa rotas existentes por role
+    for (const perm of existingPermissions) {
+      if (!existingRoutesByRole.has(perm.role)) {
+        existingRoutesByRole.set(perm.role, new Set());
+      }
+      existingRoutesByRole.get(perm.role)!.add(perm.route);
+    }
+
+    // Verifica quais rotas faltam para cada role
+    const missingPermissions = [];
+    for (const role of ROLES) {
+      const existingRoutes = existingRoutesByRole.get(role) || new Set();
+      const rolePermissions = DEFAULT_PERMISSIONS[role] || {};
+      
+      for (const route of ROUTES) {
+        if (!existingRoutes.has(route)) {
+          const canAccess = rolePermissions[route] ?? false;
+          missingPermissions.push({
+            role,
+            route,
+            can_access: canAccess,
+          });
+        }
+      }
+    }
+
+    // Adiciona permissões faltantes
+    if (missingPermissions.length > 0) {
+      await prismaClient.rolePermission.createMany({
+        data: missingPermissions,
+        skipDuplicates: true,
+      });
+    }
   }
 
   private async initializePermissions() {
