@@ -1,6 +1,6 @@
-import { Header } from './components/header';
+import { Header } from '../../components/header';
 import { OrderProvider } from '@/providers/order';
-import { Modal } from './components/modal';
+import { Modal } from '../../components/modal';
 
 export default function DashboardLayout({
   children,
