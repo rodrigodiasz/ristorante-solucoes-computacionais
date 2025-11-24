@@ -1,0 +1,44 @@
+{
+  "loginSuccess": {
+    "token": "mock-token-12345",
+    "user": {
+      "id": "1",
+      "name": "Admin User",
+      "email": "admin@ristorante.com",
+      "role": "ADMIN"
+    }
+  },
+  "userMe": {
+    "id": "1",
+    "name": "Admin User",
+    "email": "admin@ristorante.com",
+    "role": "ADMIN"
+  },
+  "orders": [
+    {
+      "id": "1",
+      "table": "1",
+      "status": "PENDING",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Bebidas",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Coca-Cola",
+      "price": 5.50,
+      "category_id": "1",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+
+
+

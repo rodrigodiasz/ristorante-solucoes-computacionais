@@ -3,14 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3333",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --coverage --watchAll=false",
+    "test:functional": "jest __tests__/functional",
+    "test:unit": "jest --testPathIgnorePatterns=__tests__/functional",
+    "test:all": "npm run test:unit && npm run test:functional",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "cypress:dev": "cypress open --config baseUrl=http://localhost:3333",
+    "test:e2e": "node scripts/check-server.js && cypress run",
+    "test:e2e:open": "node scripts/check-server.js && cypress open",
+    "test:e2e:skip-check": "cypress run"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

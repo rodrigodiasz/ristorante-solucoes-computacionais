@@ -1,0 +1,33 @@
+{
+  "admin": {
+    "email": "admin@ristorante.com",
+    "password": "admin123",
+    "role": "ADMIN",
+    "token": "mock-admin-token-12345"
+  },
+  "gerente": {
+    "email": "gerente@ristorante.com",
+    "password": "gerente123",
+    "role": "GERENTE",
+    "token": "mock-gerente-token-12345"
+  },
+  "garcom": {
+    "email": "garcom@ristorante.com",
+    "password": "garcom123",
+    "role": "GARCOM",
+    "token": "mock-garcom-token-12345"
+  },
+  "cozinha": {
+    "email": "cozinha@ristorante.com",
+    "password": "cozinha123",
+    "role": "COZINHA",
+    "token": "mock-cozinha-token-12345"
+  },
+  "invalid": {
+    "email": "invalid@example.com",
+    "password": "wrongpassword"
+  }
+}
+
+
+
